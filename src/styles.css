@@ -229,12 +229,18 @@ input::placeholder {
   text-align: center;
   color: #212121; /* Ensure text color is dark enough */
 }
+
 .modal-content .button-group {
   display: flex;
-  justify-content: space-between;
-  gap: 10px;
+  justify-content: flex-end; /* Align buttons to the right */
   margin-top: 15px;
 }
+
+.save-button, .cancel-button {
+  margin-left: 5px; /* Minimal space between buttons */
+}
+
+
 
 .modal-content button {
   padding: 8px 16px;

@@ -298,8 +298,8 @@ const TaxInvoice = () => {
       {showModal && (
   <div className="modal">
     <div className="modal-content">
-      <span className="close" onClick={closeModal}>&times;</span>
-      <label htmlFor="phone-number">Enter Phone Number (with country code):</label>
+     
+      <label htmlFor="phone-number">Enter Phone Number </label>
       <input
         type="text"
         id="phone-number"
