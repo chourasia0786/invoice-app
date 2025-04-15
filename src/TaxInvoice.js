@@ -67,7 +67,7 @@ const TaxInvoice = () => {
       <table className="info-table">
         <tbody>
           <tr>
-            <td><span className="info-title">Invoice No.:</span> 
+            <td><span className="info-title">Invoice No:</span> 
               <input 
                 type="text" 
                 value={invoiceDetails.invoiceNo} 
@@ -196,7 +196,28 @@ const TaxInvoice = () => {
         Authorized Signatory<br />
         (For SHREE GOPAL ACCESSORIES)
       </div>
+      <div className="action-buttons">
+      <a
+  href={`https://wa.me/919819287163?text=${encodeURIComponent(
+    `🧾 *Tax Invoice*\nInvoice No: ${invoiceDetails.invoiceNo}\nDate: ${invoiceDetails.invoiceDate}\nBuyer: ${invoiceDetails.buyerName}\nTotal Amount: ₹${totalAmount.toFixed(2)}`
+  )}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="whatsapp-button"
+>
+  📤 Share via WhatsApp
+</a>
+
+
+  <button className="print-button" onClick={() => window.print()}>
+    🖨️ Print Invoice
+  </button>
+</div>
+
+
+
     </div>
+    
   );
 };
 

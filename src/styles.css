@@ -162,3 +162,46 @@ input::placeholder {
     padding: 0;
   }
 }
+
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.whatsapp-button,
+.print-button {
+  padding: 8px 16px;
+  font-size: 14px;
+  background-color: #25d366;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.print-button {
+  background-color: #4CAF50;
+}
+
+.whatsapp-button:hover {
+  background-color: #1ebc59;
+}
+
+.print-button:hover {
+  background-color: #45a049;
+}
+
+/* Hide action buttons during print */
+@media print {
+  .action-buttons {
+    display: none !important;
+  }
+}
+/* @page {
+  margin: 0;
+} */
