@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./styles.css";
+import html2canvas from "html2canvas";
 
 const TaxInvoice = () => {
   const [items, setItems] = useState([
@@ -17,6 +18,9 @@ const TaxInvoice = () => {
     buyerGSTIN: "",
     buyerAddress: "",
   });
+
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [isPhoneNumberEntered, setIsPhoneNumberEntered] = useState(false);
 
   const handleInputChange = (index, field, value) => {
     const updatedItems = [...items];
@@ -49,6 +53,52 @@ const TaxInvoice = () => {
   const subtotal = calculateSubtotal();
   const { cgst, sgst, igst } = calculateTax(subtotal);
   const totalAmount = subtotal + cgst + sgst + igst;
+
+  const handlePhoneNumberChange = (e) => {
+    setPhoneNumber(e.target.value);
+  };
+
+  const handleSendMessage = () => {
+    if (phoneNumber) {
+      // Hide the elements before capturing the screenshot
+      const whatsappSection = document.querySelector('.whatsapp-section');
+      const actionButtons = document.querySelector('.action-buttons');
+      if (whatsappSection) whatsappSection.style.display = 'none';
+      if (actionButtons) actionButtons.style.display = 'none';
+  
+      // Capture the screenshot of the invoice section
+      html2canvas(document.querySelector(".invoice-box"), {
+        backgroundColor: "#ffffff", // Set background color
+        scale: 2, // Increase scale for better resolution
+        useCORS: true, // Allow cross-origin image loading
+      }).then((canvas) => {
+        // Convert the canvas to an image (data URL)
+        const imageUrl = canvas.toDataURL("image/png");
+  
+        // Create a temporary link element to trigger the download
+        const link = document.createElement("a");
+        link.href = imageUrl;
+        link.download = "invoice.png"; // Name the downloaded file
+        link.click(); // Trigger the download
+  
+        // Show the hidden elements again
+        if (whatsappSection) whatsappSection.style.display = 'block';
+        if (actionButtons) actionButtons.style.display = 'block';
+  
+        // Now send the message via WhatsApp
+        const whatsappMessage = `🧾 *Tax Invoice*\n\nPlease find the invoice attached below.`;
+  
+        // Open WhatsApp with the message and the phone number
+        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+        window.open(whatsappUrl, "_blank");
+      });
+    } else {
+      alert("Please enter a valid phone number.");
+    }
+  };
+  
+  
+  
 
   return (
     <div className="invoice-box">
@@ -196,28 +246,34 @@ const TaxInvoice = () => {
         Authorized Signatory<br />
         (For SHREE GOPAL ACCESSORIES)
       </div>
-      <div className="action-buttons">
-      <a
-  href={`https://wa.me/919819287163?text=${encodeURIComponent(
-    `🧾 *Tax Invoice*\nInvoice No: ${invoiceDetails.invoiceNo}\nDate: ${invoiceDetails.invoiceDate}\nBuyer: ${invoiceDetails.buyerName}\nTotal Amount: ₹${totalAmount.toFixed(2)}`
-  )}`}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="whatsapp-button"
->
-  📤 Share via WhatsApp
-</a>
 
+      {/* WhatsApp Phone Number Input */}
+      {!isPhoneNumberEntered && (
+        <div className="whatsapp-section">
+          <label htmlFor="phone-number">Enter Phone Number (with country code):</label>
+          <input
+            type="text"
+            id="phone-number"
+            value={phoneNumber}
+            onChange={handlePhoneNumberChange}
+            placeholder="e.g., 919819287163"
+          />
+          <button onClick={() => setIsPhoneNumberEntered(true)}>Enter</button>
+        </div>
+      )}
 
-  <button className="print-button" onClick={() => window.print()}>
-    🖨️ Print Invoice
-  </button>
-</div>
+      {isPhoneNumberEntered && (
+        <div className="action-buttons">
+          <button className="whatsapp-button" onClick={handleSendMessage}>
+            📤 Share via WhatsApp
+          </button>
 
-
-
+          <button className="print-button" onClick={() => window.print()}>
+            🖨️ Print Invoice
+          </button>
+        </div>
+      )}
     </div>
-    
   );
 };
 
