@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import "./styles.css";
 import html2canvas from "html2canvas";
+import "./styles.css";
 
 const TaxInvoice = () => {
   const [items, setItems] = useState([
@@ -10,7 +10,6 @@ const TaxInvoice = () => {
     { description: "", quantity: 0, rate: 0, amount: 0, hsnSac: "" },
   ]);
 
-  // Added state for invoice details
   const [invoiceDetails, setInvoiceDetails] = useState({
     invoiceNo: "",
     invoiceDate: "",
@@ -21,6 +20,9 @@ const TaxInvoice = () => {
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isPhoneNumberEntered, setIsPhoneNumberEntered] = useState(false);
+  const [isWhatsAppClicked, setIsWhatsAppClicked] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [showAlert, setShowAlert] = useState(false); // State for the alert box
 
   const handleInputChange = (index, field, value) => {
     const updatedItems = [...items];
@@ -63,14 +65,17 @@ const TaxInvoice = () => {
       // Hide the elements before capturing the screenshot
       const whatsappSection = document.querySelector('.whatsapp-section');
       const actionButtons = document.querySelector('.action-buttons');
+      const modal = document.querySelector('.modal'); // Select the modal
+  
       if (whatsappSection) whatsappSection.style.display = 'none';
       if (actionButtons) actionButtons.style.display = 'none';
+      if (modal) modal.style.display = 'none'; // Hide the modal
   
       // Capture the screenshot of the invoice section
       html2canvas(document.querySelector(".invoice-box"), {
-        backgroundColor: "#ffffff", // Set background color
-        scale: 2, // Increase scale for better resolution
-        useCORS: true, // Allow cross-origin image loading
+        backgroundColor: "#ffffff",
+        scale: 2,
+        useCORS: true,
       }).then((canvas) => {
         // Convert the canvas to an image (data URL)
         const imageUrl = canvas.toDataURL("image/png");
@@ -84,6 +89,7 @@ const TaxInvoice = () => {
         // Show the hidden elements again
         if (whatsappSection) whatsappSection.style.display = 'block';
         if (actionButtons) actionButtons.style.display = 'block';
+        if (modal) modal.style.display = 'block'; // Show the modal again
   
         // Now send the message via WhatsApp
         const whatsappMessage = `🧾 *Tax Invoice*\n\nPlease find the invoice attached below.`;
@@ -97,8 +103,28 @@ const TaxInvoice = () => {
     }
   };
   
-  
-  
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const openModal = () => {
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
+  const handleAlertClose = () => {
+    setShowAlert(false);
+  };
+
+  const handleAlertSave = () => {
+    setShowAlert(false);
+    alert("Invoice Saved Successfully!"); // Example of save behavior
+    
+  };
 
   return (
     <div className="invoice-box">
@@ -193,14 +219,14 @@ const TaxInvoice = () => {
                 <input
                   type="number"
                   value={item.quantity}
-                  onChange={(e) => handleInputChange(index, "quantity", parseFloat(e.target.value))}
+                  onChange={(e) => handleInputChange(index, "quantity", parseFloat(e.target.value))} 
                 />
               </td>
               <td>
                 <input
                   type="number"
                   value={item.rate}
-                  onChange={(e) => handleInputChange(index, "rate", parseFloat(e.target.value))}
+                  onChange={(e) => handleInputChange(index, "rate", parseFloat(e.target.value))} 
                 />
               </td>
               <td className="right">{item.amount.toFixed(2)}</td>
@@ -247,32 +273,48 @@ const TaxInvoice = () => {
         (For SHREE GOPAL ACCESSORIES)
       </div>
 
-      {/* WhatsApp Phone Number Input */}
-      {!isPhoneNumberEntered && (
-        <div className="whatsapp-section">
-          <label htmlFor="phone-number">Enter Phone Number (with country code):</label>
-          <input
-            type="text"
-            id="phone-number"
-            value={phoneNumber}
-            onChange={handlePhoneNumberChange}
-            placeholder="e.g., 919819287163"
-          />
-          <button onClick={() => setIsPhoneNumberEntered(true)}>Enter</button>
+      {/* Alert Box for Save/Cancel */}
+      {showAlert && (
+        <div className="alert-box">
+          <div className="alert-content">
+            <h3>Are you sure you want to save the invoice?</h3>
+            <button onClick={handleAlertSave}>Save</button>
+            <button onClick={handleAlertClose}>Cancel</button>
+          </div>
         </div>
       )}
 
-      {isPhoneNumberEntered && (
-        <div className="action-buttons">
-          <button className="whatsapp-button" onClick={handleSendMessage}>
-            📤 Share via WhatsApp
-          </button>
+      {/* Print and Share via WhatsApp Buttons on the same line */}
+      <div className="action-buttons">
+        <button className="whatsapp-button" onClick={openModal}>
+          📤 Share via WhatsApp
+        </button>
+        <button className="print-button" onClick={handlePrint}>
+          🖨️ Print Invoice
+        </button>
+      </div>
 
-          <button className="print-button" onClick={() => window.print()}>
-            🖨️ Print Invoice
-          </button>
-        </div>
-      )}
+      {/* Modal for Phone Number Input */}
+      {showModal && (
+  <div className="modal">
+    <div className="modal-content">
+      <span className="close" onClick={closeModal}>&times;</span>
+      <label htmlFor="phone-number">Enter Phone Number (with country code):</label>
+      <input
+        type="text"
+        id="phone-number"
+        value={phoneNumber}
+        onChange={handlePhoneNumberChange}
+        placeholder="e.g., 919819287163"
+      />
+      <div className="button-group">
+        <button className="save-button" onClick={handleSendMessage}>Save</button>
+        <button className="cancel-button" onClick={closeModal}>Cancel</button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };
