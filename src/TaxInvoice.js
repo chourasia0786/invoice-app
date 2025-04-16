@@ -3,11 +3,20 @@ import "./styles.css";
 
 const TaxInvoice = () => {
   const [items, setItems] = useState([
-    { description: "", quantity: 0, rate: 0, amount: 0 },
-    { description: "", quantity: 0, rate: 0, amount: 0 },
-    { description: "", quantity: 0, rate: 0, amount: 0 },
-    { description: "", quantity: 0, rate: 0, amount: 0 },
+    { description: "", quantity: 0, rate: 0, amount: 0, hsnSac: "" },
+    { description: "", quantity: 0, rate: 0, amount: 0, hsnSac: "" },
+    { description: "", quantity: 0, rate: 0, amount: 0, hsnSac: "" },
+    { description: "", quantity: 0, rate: 0, amount: 0, hsnSac: "" },
   ]);
+
+  // Added state for invoice details
+  const [invoiceDetails, setInvoiceDetails] = useState({
+    invoiceNo: "",
+    invoiceDate: "",
+    buyerName: "",
+    buyerGSTIN: "",
+    buyerAddress: "",
+  });
 
   const handleInputChange = (index, field, value) => {
     const updatedItems = [...items];
@@ -18,6 +27,12 @@ const TaxInvoice = () => {
     }
 
     setItems(updatedItems);
+  };
+
+  const handleInvoiceDetailsChange = (field, value) => {
+    const updatedDetails = { ...invoiceDetails };
+    updatedDetails[field] = value;
+    setInvoiceDetails(updatedDetails);
   };
 
   const calculateSubtotal = () => {
@@ -52,15 +67,45 @@ const TaxInvoice = () => {
       <table className="info-table">
         <tbody>
           <tr>
-            <td><span className="info-title">Invoice No.:</span> ____________</td>
-            <td><span className="info-title">Invoice Date:</span> ____ / ____ / ______</td>
+            <td><span className="info-title">Invoice No.:</span> 
+              <input 
+                type="text" 
+                value={invoiceDetails.invoiceNo} 
+                onChange={(e) => handleInvoiceDetailsChange('invoiceNo', e.target.value)} 
+              />
+            </td>
+            <td><span className="info-title">Invoice Date:</span> 
+              <input 
+                type="date" 
+                value={invoiceDetails.invoiceDate} 
+                onChange={(e) => handleInvoiceDetailsChange('invoiceDate', e.target.value)} 
+              />
+            </td>
           </tr>
           <tr>
-            <td><span className="info-title">Buyer Name:</span> __________________</td>
-            <td><span className="info-title">GSTIN:</span> ______________________</td>
+            <td><span className="info-title">Buyer Name:</span> 
+              <input 
+                type="text" 
+                value={invoiceDetails.buyerName} 
+                onChange={(e) => handleInvoiceDetailsChange('buyerName', e.target.value)} 
+              />
+            </td>
+            <td><span className="info-title">GSTIN:</span> 
+              <input 
+                type="text" 
+                value={invoiceDetails.buyerGSTIN} 
+                onChange={(e) => handleInvoiceDetailsChange('buyerGSTIN', e.target.value)} 
+              />
+            </td>
           </tr>
           <tr>
-            <td colSpan="2"><span className="info-title">Buyer Address:</span> _____________________________________________</td>
+            <td colSpan="2"><span className="info-title">Buyer Address:</span> 
+              <input 
+                type="text" 
+                value={invoiceDetails.buyerAddress} 
+                onChange={(e) => handleInvoiceDetailsChange('buyerAddress', e.target.value)} 
+              />
+            </td>
           </tr>
         </tbody>
       </table>
@@ -87,7 +132,13 @@ const TaxInvoice = () => {
                   onChange={(e) => handleInputChange(index, "description", e.target.value)}
                 />
               </td>
-              <td></td>
+              <td>
+                <input
+                  type="text"
+                  value={item.hsnSac}
+                  onChange={(e) => handleInputChange(index, "hsnSac", e.target.value)}
+                />
+              </td>
               <td>
                 <input
                   type="number"
