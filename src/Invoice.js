@@ -7,6 +7,8 @@ const Invoice = () => {
     { description: "", quantity: 0, rate: 0, amount: 0 },
     { description: "", quantity: 0, rate: 0, amount: 0 },
     { description: "", quantity: 0, rate: 0, amount: 0 },
+		{ description: "", quantity: 0, rate: 0, amount: 0 },
+		{ description: "", quantity: 0, rate: 0, amount: 0 },
   ]);
 
   const [invoiceDetails, setInvoiceDetails] = useState({
