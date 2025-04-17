@@ -189,9 +189,9 @@ const Invoice = () => {
       </table>
 
       <div className="action-buttons">
-        <button className="whatsapp-button" onClick={openModal}>
+        {/* <button className="whatsapp-button" onClick={openModal}>
           📤 Share via WhatsApp
-        </button>
+        </button> */}
         <button className="print-button" onClick={handlePrint}>
           🖨️ Print Invoice
         </button>
