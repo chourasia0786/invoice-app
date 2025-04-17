@@ -1,6 +1,6 @@
 {
-  "short_name": "Invoice App",
-  "name": "Invoice Generator",
+  "short_name": "React App",
+  "name": "Create React App Sample",
   "icons": [
     {
       "src": "favicon.ico",
@@ -18,8 +18,8 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": "/invoice-app/",
+  "start_url": ".",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000"
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
 }
