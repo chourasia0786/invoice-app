@@ -62,39 +62,34 @@ const TaxInvoice = () => {
 
   const handleSendMessage = () => {
     if (phoneNumber) {
-      // Hide the elements before capturing the screenshot
-      const whatsappSection = document.querySelector('.whatsapp-section');
-      const actionButtons = document.querySelector('.action-buttons');
-      const modal = document.querySelector('.modal'); // Select the modal
-  
-      if (whatsappSection) whatsappSection.style.display = 'none';
-      if (actionButtons) actionButtons.style.display = 'none';
-      if (modal) modal.style.display = 'none'; // Hide the modal
-  
-      // Capture the screenshot of the invoice section
+      const whatsappSection = document.querySelector(".whatsapp-section");
+      const actionButtons = document.querySelector(".action-buttons");
+      const modal = document.querySelector(".modal");
+
+      if (whatsappSection) whatsappSection.style.display = "none";
+      if (actionButtons) actionButtons.style.display = "none";
+      if (modal) modal.style.display = "none";
+
       html2canvas(document.querySelector(".invoice-box"), {
         backgroundColor: "#ffffff",
         scale: 2,
         useCORS: true,
       }).then((canvas) => {
-        // Convert the canvas to an image (data URL)
         const imageUrl = canvas.toDataURL("image/png");
-  
-        // Create a temporary link element to trigger the download
         const link = document.createElement("a");
         link.href = imageUrl;
-        link.download = "invoice.png"; // Name the downloaded file
-        link.click(); // Trigger the download
-  
-        // Show the hidden elements again
-        if (whatsappSection) whatsappSection.style.display = 'block';
-        if (actionButtons) actionButtons.style.display = 'block';
-        if (modal) modal.style.display = 'block'; // Show the modal again
-  
-        // Now send the message via WhatsApp
+        link.download = "invoice.png";
+        link.click();
+
+        // Restore elements with correct display properties
+        if (whatsappSection) whatsappSection.style.display = "block";
+        if (actionButtons) {
+          actionButtons.style.display = "flex"; // Restore as flex to maintain alignment
+          actionButtons.style.justifyContent = "flex-end"; // Explicitly set to ensure alignment
+        }
+        if (modal) modal.style.display = "flex"; // Restore modal as flex
+
         const whatsappMessage = `🧾 *Tax Invoice*\n\nPlease find the invoice attached below.`;
-  
-        // Open WhatsApp with the message and the phone number
         const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMessage)}`;
         window.open(whatsappUrl, "_blank");
       });
@@ -102,7 +97,7 @@ const TaxInvoice = () => {
       alert("Please enter a valid phone number.");
     }
   };
-  
+
 
   const handlePrint = () => {
     window.print();
@@ -123,7 +118,7 @@ const TaxInvoice = () => {
   const handleAlertSave = () => {
     setShowAlert(false);
     alert("Invoice Saved Successfully!"); // Example of save behavior
-    
+
   };
 
   return (
@@ -143,43 +138,43 @@ const TaxInvoice = () => {
       <table className="info-table">
         <tbody>
           <tr>
-            <td><span className="info-title">Invoice No:</span> 
-              <input 
-                type="text" 
-                value={invoiceDetails.invoiceNo} 
-                onChange={(e) => handleInvoiceDetailsChange('invoiceNo', e.target.value)} 
+            <td><span className="info-title">Invoice No:</span>
+              <input
+                type="text"
+                value={invoiceDetails.invoiceNo}
+                onChange={(e) => handleInvoiceDetailsChange('invoiceNo', e.target.value)}
               />
             </td>
-            <td><span className="info-title">Invoice Date:</span> 
-              <input 
-                type="date" 
-                value={invoiceDetails.invoiceDate} 
-                onChange={(e) => handleInvoiceDetailsChange('invoiceDate', e.target.value)} 
-              />
-            </td>
-          </tr>
-          <tr>
-            <td><span className="info-title">Buyer Name:</span> 
-              <input 
-                type="text" 
-                value={invoiceDetails.buyerName} 
-                onChange={(e) => handleInvoiceDetailsChange('buyerName', e.target.value)} 
-              />
-            </td>
-            <td><span className="info-title">GSTIN:</span> 
-              <input 
-                type="text" 
-                value={invoiceDetails.buyerGSTIN} 
-                onChange={(e) => handleInvoiceDetailsChange('buyerGSTIN', e.target.value)} 
+            <td><span className="info-title">Invoice Date:</span>
+              <input
+                type="date"
+                value={invoiceDetails.invoiceDate}
+                onChange={(e) => handleInvoiceDetailsChange('invoiceDate', e.target.value)}
               />
             </td>
           </tr>
           <tr>
-            <td colSpan="2"><span className="info-title">Buyer Address:</span> 
-              <input 
-                type="text" 
-                value={invoiceDetails.buyerAddress} 
-                onChange={(e) => handleInvoiceDetailsChange('buyerAddress', e.target.value)} 
+            <td><span className="info-title">Buyer Name:</span>
+              <input
+                type="text"
+                value={invoiceDetails.buyerName}
+                onChange={(e) => handleInvoiceDetailsChange('buyerName', e.target.value)}
+              />
+            </td>
+            <td><span className="info-title">GSTIN:</span>
+              <input
+                type="text"
+                value={invoiceDetails.buyerGSTIN}
+                onChange={(e) => handleInvoiceDetailsChange('buyerGSTIN', e.target.value)}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td colSpan="2"><span className="info-title">Buyer Address:</span>
+              <input
+                type="text"
+                value={invoiceDetails.buyerAddress}
+                onChange={(e) => handleInvoiceDetailsChange('buyerAddress', e.target.value)}
               />
             </td>
           </tr>
@@ -219,14 +214,14 @@ const TaxInvoice = () => {
                 <input
                   type="number"
                   value={item.quantity}
-                  onChange={(e) => handleInputChange(index, "quantity", parseFloat(e.target.value))} 
+                  onChange={(e) => handleInputChange(index, "quantity", parseFloat(e.target.value))}
                 />
               </td>
               <td>
                 <input
                   type="number"
                   value={item.rate}
-                  onChange={(e) => handleInputChange(index, "rate", parseFloat(e.target.value))} 
+                  onChange={(e) => handleInputChange(index, "rate", parseFloat(e.target.value))}
                 />
               </td>
               <td className="right">{item.amount.toFixed(2)}</td>
@@ -273,16 +268,21 @@ const TaxInvoice = () => {
         (For SHREE GOPAL ACCESSORIES)
       </div>
 
-      {/* Alert Box for Save/Cancel */}
       {showAlert && (
-        <div className="alert-box">
-          <div className="alert-content">
-            <h3>Are you sure you want to save the invoice?</h3>
-            <button onClick={handleAlertSave}>Save</button>
-            <button onClick={handleAlertClose}>Cancel</button>
-          </div>
-        </div>
-      )}
+  <div className="alert-box">
+    <div className="alert-content">
+      <h3>Are you sure you want to save the invoice?</h3>
+      <div className="button-group">
+        <button className="save-button" onClick={handleAlertSave}>
+          Save
+        </button>
+        <button className="cancel-button" onClick={handleAlertClose}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       {/* Print and Share via WhatsApp Buttons on the same line */}
       <div className="action-buttons">
@@ -298,7 +298,7 @@ const TaxInvoice = () => {
       {showModal && (
   <div className="modal">
     <div className="modal-content">
-     
+
       <label htmlFor="phone-number">Enter Phone Number </label>
       <input
         type="text"
