@@ -1,25 +1,24 @@
 import logo from './logo.svg';
 import './App.css';
 
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import TaxInvoice from './TaxInvoice'; // Adjust path if needed
+import Invoice from './Invoice'; // Adjust path if needed
+import './styles.css';
+
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <Routes>
+        <Route path="/" element={<TaxInvoice />} />
+        <Route path="/invoice" element={<Invoice />} />
+        <Route path="*" element={<div>404 - Page Not Found</div>} />
+      </Routes>
     </div>
   );
 }
 
 export default App;
+
+
