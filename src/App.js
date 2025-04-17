@@ -11,13 +11,14 @@ function App() {
   return (
     <div>
       <Routes>
-        <Route path="/" element={<TaxInvoice />} />
-        <Route path="/invoice" element={<Invoice />} />
+        <Route path="/invoice-app" element={<TaxInvoice />} />
+        <Route path="/invoice-app/invoice" element={<Invoice />} />
         <Route path="*" element={<div>404 - Page Not Found</div>} />
       </Routes>
     </div>
   );
 }
+
 
 export default App;
 
