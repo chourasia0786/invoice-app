@@ -3,10 +3,10 @@ import html2canvas from "html2canvas";
 
 const Invoice = () => {
   const [items, setItems] = useState([
-    { description: "", quantity: 0, rate: 0, amount: 0, hsnSac: "" },
-    { description: "", quantity: 0, rate: 0, amount: 0, hsnSac: "" },
-    { description: "", quantity: 0, rate: 0, amount: 0, hsnSac: "" },
-    { description: "", quantity: 0, rate: 0, amount: 0, hsnSac: "" },
+    { description: "", quantity: 0, rate: 0, amount: 0 },
+    { description: "", quantity: 0, rate: 0, amount: 0 },
+    { description: "", quantity: 0, rate: 0, amount: 0 },
+    { description: "", quantity: 0, rate: 0, amount: 0 },
   ]);
 
   const [invoiceDetails, setInvoiceDetails] = useState({
@@ -15,8 +15,7 @@ const Invoice = () => {
     buyerName: "",
   });
 
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [showModal, setShowModal] = useState(false);
+  const [showButtons, setShowButtons] = useState(true);
 
   const handleInputChange = (index, field, value) => {
     const updatedItems = [...items];
@@ -37,20 +36,11 @@ const Invoice = () => {
     return items.reduce((total, item) => total + item.amount, 0);
   };
 
-  const handlePhoneNumberChange = (e) => {
-    setPhoneNumber(e.target.value);
-  };
+  const handlePrint = () => {
+    setShowButtons(false);
 
-  const handleSendMessage = () => {
-    if (phoneNumber) {
-      const whatsappSection = document.querySelector(".whatsapp-section");
-      const actionButtons = document.querySelector(".action-buttons");
-      const modal = document.querySelector(".modal");
-
-      if (whatsappSection) whatsappSection.style.display = "none";
-      if (actionButtons) actionButtons.style.display = "none";
-      if (modal) modal.style.display = "none";
-
+    // Use setTimeout to ensure the state update is reflected in the DOM
+    setTimeout(() => {
       html2canvas(document.querySelector(".invoice-box"), {
         backgroundColor: "#ffffff",
         scale: 2,
@@ -62,29 +52,9 @@ const Invoice = () => {
         link.download = "invoice.png";
         link.click();
 
-        if (whatsappSection) whatsappSection.style.display = "block";
-        if (actionButtons) actionButtons.style.display = "flex";
-        if (modal) modal.style.display = "flex";
-
-        const whatsappMessage = `🧾 *Tax Invoice*\n\nPlease find the invoice attached below.`;
-        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMessage)}`;
-        window.open(whatsappUrl, "_blank");
+        setShowButtons(true);
       });
-    } else {
-      alert("Please enter a valid phone number.");
-    }
-  };
-
-  const handlePrint = () => {
-    window.print();
-  };
-
-  const openModal = () => {
-    setShowModal(true);
-  };
-
-  const closeModal = () => {
-    setShowModal(false);
+    }, 100); // Small delay to ensure DOM updates
   };
 
   const totalAmount = calculateTotal();
@@ -92,7 +62,6 @@ const Invoice = () => {
   return (
     <div className="invoice-box">
       <div className="highlight-block">
-        {/* <h2 className="main-header">🧾 Tax Invoice</h2> */}
         <h4><strong>SHREE GOPAL ACCESSORIES</strong></h4>
         <p><strong>Mobile Accessories</strong></p>
         <p>
@@ -140,7 +109,6 @@ const Invoice = () => {
           <tr>
             <th>Sr. No.</th>
             <th>Description of Goods</th>
-            <th>HSN/SAC</th>
             <th>Qty</th>
             <th>Rate (₹)</th>
             <th>Amount (₹)</th>
@@ -155,13 +123,6 @@ const Invoice = () => {
                   type="text"
                   value={item.description}
                   onChange={(e) => handleInputChange(index, "description", e.target.value)}
-                />
-              </td>
-              <td>
-                <input
-                  type="text"
-                  value={item.hsnSac}
-                  onChange={(e) => handleInputChange(index, "hsnSac", e.target.value)}
                 />
               </td>
               <td>
@@ -182,37 +143,17 @@ const Invoice = () => {
             </tr>
           ))}
           <tr>
-            <td colSpan="5" className="right bold">Total Amount</td>
+            <td colSpan="4" className="right bold">Total Amount</td>
             <td className="right bold">{totalAmount.toFixed(2)}</td>
           </tr>
         </tbody>
       </table>
 
-      <div className="action-buttons">
-        {/* <button className="whatsapp-button" onClick={openModal}>
-          📤 Share via WhatsApp
-        </button> */}
-        <button className="print-button" onClick={handlePrint}>
-          🖨️ Print Invoice
-        </button>
-      </div>
-
-      {showModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <label htmlFor="phone-number">Enter Phone Number</label>
-            <input
-              type="text"
-              id="phone-number"
-              value={phoneNumber}
-              onChange={handlePhoneNumberChange}
-              placeholder="e.g., 919819287163"
-            />
-            <div className="button-group">
-              <button className="save-button" onClick={handleSendMessage}>Save</button>
-              <button className="cancel-button" onClick={closeModal}>Cancel</button>
-            </div>
-          </div>
+      {showButtons && (
+        <div className="action-buttons">
+          <button className="print-button" onClick={handlePrint}>
+            🖨️ Print Invoice
+          </button>
         </div>
       )}
     </div>
