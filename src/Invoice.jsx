@@ -3,12 +3,18 @@ import html2canvas from "html2canvas";
 
 const Invoice = () => {
   const [items, setItems] = useState([
-    { description: "", quantity: 0, rate: 0, amount: 0 },
-    { description: "", quantity: 0, rate: 0, amount: 0 },
-    { description: "", quantity: 0, rate: 0, amount: 0 },
-    { description: "", quantity: 0, rate: 0, amount: 0 },
-		{ description: "", quantity: 0, rate: 0, amount: 0 },
-		{ description: "", quantity: 0, rate: 0, amount: 0 },
+    { description: "", quantity: "", rate: "", amount: "" },
+    { description: "", quantity: "", rate: "", amount: "" },
+    { description: "", quantity: "", rate: "", amount: "" },
+    { description: "", quantity: "", rate: "", amount: "" },
+    { description: "", quantity: "", rate: "", amount: "" },
+    { description: "", quantity: "", rate: "", amount: "" },
+    { description: "", quantity: "", rate: "", amount: "" },
+    { description: "", quantity: "", rate: "", amount: "" },
+    { description: "", quantity: "", rate: "", amount: "" },
+    { description: "", quantity: "", rate: "", amount: "" },
+    { description: "", quantity: "", rate: "", amount: "" },
+    { description: "", quantity: "", rate: "", amount: "" },
   ]);
 
   const [invoiceDetails, setInvoiceDetails] = useState({
@@ -21,29 +27,46 @@ const Invoice = () => {
 
   const handleInputChange = (index, field, value) => {
     const updatedItems = [...items];
-    updatedItems[index][field] = value;
+    // Convert description to uppercase, keep other fields as is
+    updatedItems[index][field] = field === "description" ? value.toUpperCase() : value;
 
     if (field === "quantity" || field === "rate") {
-      updatedItems[index].amount = updatedItems[index].quantity * updatedItems[index].rate;
+      const quantity = parseFloat(updatedItems[index].quantity) || 0;
+      const rate = parseFloat(updatedItems[index].rate) || 0;
+      updatedItems[index].amount = quantity * rate || "";
     }
 
     setItems(updatedItems);
   };
 
   const handleInvoiceDetailsChange = (field, value) => {
-    setInvoiceDetails({ ...invoiceDetails, [field]: value });
+    // Convert buyerName to uppercase, keep other fields as is
+    const newValue = field === "buyerName" ? value.toUpperCase() : value;
+    setInvoiceDetails({ ...invoiceDetails, [field]: newValue });
   };
 
   const calculateTotal = () => {
-    return items.reduce((total, item) => total + item.amount, 0);
+    const total = items.reduce((total, item) => {
+      const amount = parseFloat(item.amount) || 0;
+      return total + amount;
+    }, 0);
+    return total || "";
+  };
+
+  const calculateTotalQuantity = () => {
+    const total = items.reduce((total, item) => {
+      const quantity = parseFloat(item.quantity) || 0;
+      return total + quantity;
+    }, 0);
+    return total || "";
   };
 
   const handlePrint = () => {
     setShowButtons(false);
 
-    // Use setTimeout to ensure the state update is reflected in the DOM
     setTimeout(() => {
-      html2canvas(document.querySelector(".invoice-box"), {
+      const invoiceBox = document.querySelector(".invoice-box");
+      html2canvas(invoiceBox, {
         backgroundColor: "#ffffff",
         scale: 2,
         useCORS: true,
@@ -51,25 +74,55 @@ const Invoice = () => {
         const imageUrl = canvas.toDataURL("image/png");
         const link = document.createElement("a");
         link.href = imageUrl;
-        link.download = "invoice.png";
+
+        // Create a safe filename by replacing invalid characters
+        const safeBuyerName = invoiceDetails.buyerName.replace(/[^a-zA-Z0-9]/g, '_') || 'unnamed';
+        const safeInvoiceNo = invoiceDetails.invoiceNo.replace(/[^a-zA-Z0-9]/g, '_') || 'unnamed';
+        const safeInvoiceDate = invoiceDetails.invoiceDate.replace(/[^a-zA-Z0-9]/g, '_') || 'undated';
+
+        // Set filename as invoice_{invoiceNo}_{buyerName}_{invoiceDate}.png
+        link.download = `invoice_${safeInvoiceNo}_${safeBuyerName}_${safeInvoiceDate}.png`;
         link.click();
 
         setShowButtons(true);
       });
-    }, 100); // Small delay to ensure DOM updates
+    }, 100);
   };
 
   const totalAmount = calculateTotal();
+  const totalQuantity = calculateTotalQuantity();
 
   return (
     <div className="invoice-box">
+      <style>
+        {`
+          .invoice-box * {
+            text-transform: uppercase;
+          }
+          .invoice-box input {
+            text-transform: uppercase; /* Force input display to uppercase */
+          }
+          .highlight-block, .info-table, .billing-table {
+            text-transform: uppercase;
+          }
+          .billing-table input {
+            text-transform: uppercase; /* Force input display to uppercase */
+          }
+          .right {
+            text-align: right;
+          }
+          .bold {
+            font-weight: bold;
+          }
+        `}
+      </style>
       <div className="highlight-block">
         <h4><strong>SHREE GOPAL ACCESSORIES</strong></h4>
-        <p><strong>Mobile Accessories</strong></p>
+        <p><strong>MOBILE ACCESSORIES</strong></p>
         <p>
-          1st Floor, Shop No. 144/145, Orchid City Centre Mall,<br />
-          Bellasis Road, Opp. S.T. Depot, Tardeo,<br />
-          Mumbai Central, Mumbai City, Maharashtra – 400008
+          1ST FLOOR, SHOP NO. 144/145, ORCHID CITY CENTRE MALL,<br />
+          BELLASIS ROAD, OPP. S.T. DEPOT, TARDEO,<br />
+          MUMBAI CENTRAL, MUMBAI CITY, MAHARASHTRA – 400008
         </p>
       </div>
 
@@ -77,7 +130,7 @@ const Invoice = () => {
         <tbody>
           <tr>
             <td>
-              <span className="info-title">Invoice No:</span>
+              <span className="info-title">INVOICE NO:</span>
               <input
                 type="text"
                 value={invoiceDetails.invoiceNo}
@@ -85,7 +138,7 @@ const Invoice = () => {
               />
             </td>
             <td>
-              <span className="info-title">Invoice Date:</span>
+              <span className="info-title">INVOICE DATE:</span>
               <input
                 type="date"
                 value={invoiceDetails.invoiceDate}
@@ -95,7 +148,7 @@ const Invoice = () => {
           </tr>
           <tr>
             <td>
-              <span className="info-title">Buyer Name:</span>
+              <span className="info-title">BUYER NAME:</span>
               <input
                 type="text"
                 value={invoiceDetails.buyerName}
@@ -109,11 +162,11 @@ const Invoice = () => {
       <table className="billing-table">
         <thead>
           <tr>
-            <th>Sr. No.</th>
-            <th>Description of Goods</th>
-            <th>Qty</th>
-            <th>Rate (₹)</th>
-            <th>Amount (₹)</th>
+            <th>SR. NO.</th>
+            <th>DESCRIPTION OF GOODS</th>
+            <th>QTY</th>
+            <th>RATE (₹)</th>
+            <th>AMOUNT (₹)</th>
           </tr>
         </thead>
         <tbody>
@@ -131,22 +184,24 @@ const Invoice = () => {
                 <input
                   type="number"
                   value={item.quantity}
-                  onChange={(e) => handleInputChange(index, "quantity", parseFloat(e.target.value))}
+                  onChange={(e) => handleInputChange(index, "quantity", e.target.value)}
                 />
               </td>
               <td>
                 <input
                   type="number"
                   value={item.rate}
-                  onChange={(e) => handleInputChange(index, "rate", parseFloat(e.target.value))}
+                  onChange={(e) => handleInputChange(index, "rate", e.target.value)}
                 />
               </td>
-              <td className="right">{item.amount.toFixed(2)}</td>
+              <td className="right">{isNaN(parseFloat(item.amount)) ? "" : parseFloat(item.amount).toFixed(2)}</td>
             </tr>
           ))}
           <tr>
-            <td colSpan="4" className="right bold">Total Amount</td>
-            <td className="right bold">{totalAmount.toFixed(2)}</td>
+            <td colSpan="2" className="right bold">TOTAL</td>
+            <td className="right bold">{isNaN(totalQuantity) ? "" : totalQuantity.toFixed(2)}</td>
+            <td></td>
+            <td className="right bold">{isNaN(totalAmount) ? "" : totalAmount.toFixed(2)}</td>
           </tr>
         </tbody>
       </table>
@@ -154,7 +209,7 @@ const Invoice = () => {
       {showButtons && (
         <div className="action-buttons">
           <button className="print-button" onClick={handlePrint}>
-            🖨️ Print Invoice
+            🖨️ PRINT INVOICE
           </button>
         </div>
       )}
