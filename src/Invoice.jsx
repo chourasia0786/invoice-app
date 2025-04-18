@@ -58,8 +58,25 @@ const Invoice = () => {
     }, 0);
   };
 
+  const isRowEmpty = (item) => {
+    return (
+      !item.description &&
+      (!item.quantity || item.quantity === "0" || item.quantity === "") &&
+      (!item.rate || item.rate === "0" || item.rate === "") &&
+      (!item.amount || item.amount === "0" || item.amount === "")
+    );
+  };
+
   const handlePrint = () => {
     setShowButtons(false);
+
+    // Add a class to hide empty rows
+    const rows = document.querySelectorAll(".billing-table tbody tr:not(:last-child)");
+    rows.forEach((row, index) => {
+      if (isRowEmpty(items[index])) {
+        row.classList.add("hide-for-print");
+      }
+    });
 
     setTimeout(() => {
       const invoiceBox = document.querySelector(".invoice-box");
@@ -72,13 +89,15 @@ const Invoice = () => {
         const link = document.createElement("a");
         link.href = imageUrl;
 
-        const safeBuyerName = invoiceDetails.buyerName.replace(/[^a-zA-Z0-9]/g, '_') || 'unnamed';
-        const safeInvoiceNo = invoiceDetails.invoiceNo.replace(/[^a-zA-Z0-9]/g, '_') || 'unnamed';
-        const safeInvoiceDate = invoiceDetails.invoiceDate.replace(/[^a-zA-Z0-9]/g, '_') || 'undated';
+        const safeBuyerName = invoiceDetails.buyerName.replace(/[^a-zA-Z0-9]/g, "_") || "unnamed";
+        const safeInvoiceNo = invoiceDetails.invoiceNo.replace(/[^a-zA-Z0-9]/g, "_") || "unnamed";
+        const safeInvoiceDate = invoiceDetails.invoiceDate.replace(/[^a-zA-Z0-9]/g, "_") || "undated";
 
         link.download = `invoice_${safeInvoiceNo}_${safeBuyerName}_${safeInvoiceDate}.png`;
         link.click();
 
+        // Remove the hide class after printing
+        rows.forEach((row) => row.classList.remove("hide-for-print"));
         setShowButtons(true);
       });
     }, 100);
@@ -108,6 +127,9 @@ const Invoice = () => {
           }
           .bold {
             font-weight: bold;
+          }
+          .hide-for-print {
+            display: none;
           }
         `}
       </style>
