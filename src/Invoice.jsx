@@ -46,19 +46,17 @@ const Invoice = () => {
   };
 
   const calculateTotal = () => {
-    const total = items.reduce((total, item) => {
+    return items.reduce((total, item) => {
       const amount = parseFloat(item.amount) || 0;
       return total + amount;
     }, 0);
-    return total || "";
   };
 
   const calculateTotalQuantity = () => {
-    const total = items.reduce((total, item) => {
+    return items.reduce((total, item) => {
       const quantity = parseFloat(item.quantity) || 0;
       return total + quantity;
     }, 0);
-    return total || "";
   };
 
   const handlePrint = () => {
@@ -194,14 +192,20 @@ const Invoice = () => {
                   onChange={(e) => handleInputChange(index, "rate", e.target.value)}
                 />
               </td>
-              <td className="right">{isNaN(parseFloat(item.amount)) ? "" : parseFloat(item.amount).toFixed(2)}</td>
+              <td className="right">
+                {item.amount === "" || isNaN(parseFloat(item.amount)) ? "" : parseFloat(item.amount).toFixed(2)}
+              </td>
             </tr>
           ))}
           <tr>
             <td colSpan="2" className="right bold">TOTAL</td>
-            <td className="right bold">{isNaN(totalQuantity) ? "" : totalQuantity.toFixed(2)}</td>
+            <td className="right bold">
+              {totalQuantity === 0 ? "" : totalQuantity.toFixed(2)}
+            </td>
             <td></td>
-            <td className="right bold">{isNaN(totalAmount) ? "" : totalAmount.toFixed(2)}</td>
+            <td className="right bold">
+              {totalAmount === 0 ? "" : totalAmount.toFixed(2)}
+            </td>
           </tr>
         </tbody>
       </table>
