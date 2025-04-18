@@ -3,13 +3,15 @@ import html2canvas from "html2canvas";
 import "./styles.css";
 
 const TaxInvoice = () => {
-  const [items, setItems] = useState([
-    { description: "", quantity: 0, rate: 0, amount: 0, hsnSac: "" },
-    { description: "", quantity: 0, rate: 0, amount: 0, hsnSac: "" },
-    { description: "", quantity: 0, rate: 0, amount: 0, hsnSac: "" },
-    { description: "", quantity: 0, rate: 0, amount: 0, hsnSac: "" },
-  ]);
+  const initialItems = Array(12).fill().map(() => ({
+    description: "",
+    quantity: "",
+    rate: "",
+    amount: "",
+    hsnSac: "",
+  }));
 
+  const [items, setItems] = useState(initialItems);
   const [invoiceDetails, setInvoiceDetails] = useState({
     invoiceNo: "",
     invoiceDate: "",
@@ -17,32 +19,55 @@ const TaxInvoice = () => {
     buyerGSTIN: "",
     buyerAddress: "",
   });
-
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isPhoneNumberEntered, setIsPhoneNumberEntered] = useState(false);
   const [isWhatsAppClicked, setIsWhatsAppClicked] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [showAlert, setShowAlert] = useState(false); // State for the alert box
+  const [showAlert, setShowAlert] = useState(false);
+  const [showButtons, setShowButtons] = useState(true);
 
   const handleInputChange = (index, field, value) => {
     const updatedItems = [...items];
-    updatedItems[index][field] = value;
+    updatedItems[index][field] = field === "description" || field === "hsnSac" ? value.toUpperCase() : value;
 
     if (field === "quantity" || field === "rate") {
-      updatedItems[index].amount = updatedItems[index].quantity * updatedItems[index].rate;
+      const quantity = parseFloat(updatedItems[index].quantity) || 0;
+      const rate = parseFloat(updatedItems[index].rate) || 0;
+      updatedItems[index].amount = quantity * rate || "";
     }
 
     setItems(updatedItems);
   };
 
   const handleInvoiceDetailsChange = (field, value) => {
-    const updatedDetails = { ...invoiceDetails };
-    updatedDetails[field] = value;
-    setInvoiceDetails(updatedDetails);
+    const newValue = field === "buyerName" || field === "buyerAddress" ? value.toUpperCase() : value;
+    setInvoiceDetails({ ...invoiceDetails, [field]: newValue });
+  };
+
+  const handleClear = () => {
+    setItems(initialItems);
+    setInvoiceDetails({
+      invoiceNo: "",
+      invoiceDate: "",
+      buyerName: "",
+      buyerGSTIN: "",
+      buyerAddress: "",
+    });
+    setPhoneNumber("");
   };
 
   const calculateSubtotal = () => {
-    return items.reduce((total, item) => total + item.amount, 0);
+    return items.reduce((total, item) => {
+      const amount = parseFloat(item.amount) || 0;
+      return total + amount;
+    }, 0);
+  };
+
+  const calculateTotalQuantity = () => {
+    return items.reduce((total, item) => {
+      const quantity = parseFloat(item.quantity) || 0;
+      return total + quantity;
+    }, 0);
   };
 
   const calculateTax = (subtotal) => {
@@ -52,9 +77,15 @@ const TaxInvoice = () => {
     return { cgst, sgst, igst };
   };
 
-  const subtotal = calculateSubtotal();
-  const { cgst, sgst, igst } = calculateTax(subtotal);
-  const totalAmount = subtotal + cgst + sgst + igst;
+  const isRowEmpty = (item) => {
+    return (
+      !item.description &&
+      (!item.quantity || item.quantity === "0" || item.quantity === "") &&
+      (!item.rate || item.rate === "0" || item.rate === "") &&
+      (!item.amount || item.amount === "0" || item.amount === "") &&
+      !item.hsnSac
+    );
+  };
 
   const handlePhoneNumberChange = (e) => {
     setPhoneNumber(e.target.value);
@@ -62,6 +93,7 @@ const TaxInvoice = () => {
 
   const handleSendMessage = () => {
     if (phoneNumber) {
+      setShowButtons(false);
       const whatsappSection = document.querySelector(".whatsapp-section");
       const actionButtons = document.querySelector(".action-buttons");
       const modal = document.querySelector(".modal");
@@ -70,7 +102,63 @@ const TaxInvoice = () => {
       if (actionButtons) actionButtons.style.display = "none";
       if (modal) modal.style.display = "none";
 
-      html2canvas(document.querySelector(".invoice-box"), {
+      const rows = document.querySelectorAll(".billing-table tbody tr");
+      rows.forEach((row, index) => {
+        if (index < items.length && isRowEmpty(items[index])) {
+          row.classList.add("hide-for-print");
+        }
+      });
+
+      setTimeout(() => {
+        html2canvas(document.querySelector(".invoice-box"), {
+          backgroundColor: "#ffffff",
+          scale: 2,
+          useCORS: true,
+        }).then((canvas) => {
+          const imageUrl = canvas.toDataURL("image/png");
+          const link = document.createElement("a");
+          link.href = imageUrl;
+
+          const safeBuyerName = invoiceDetails.buyerName.replace(/[^a-zA-Z0-9]/g, "_") || "unnamed";
+          const safeInvoiceNo = invoiceDetails.invoiceNo.replace(/[^a-zA-Z0-9]/g, "_") || "unnamed";
+          const safeInvoiceDate = invoiceDetails.invoiceDate.replace(/[^a-zA-Z0-9]/g, "_") || "undated";
+
+          link.download = `invoice_${safeInvoiceNo}_${safeBuyerName}_${safeInvoiceDate}.png`;
+          link.click();
+
+          if (whatsappSection) whatsappSection.style.display = "block";
+          if (actionButtons) {
+            actionButtons.style.display = "flex";
+            actionButtons.style.justifyContent = "flex-end";
+          }
+          if (modal) modal.style.display = "flex";
+
+          rows.forEach((row) => row.classList.remove("hide-for-print"));
+          setShowButtons(true);
+
+          const whatsappMessage = `🧾 *Tax Invoice*\n\nPlease find the invoice attached below.`;
+          const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+          window.open(whatsappUrl, "_blank");
+        });
+      }, 100);
+    } else {
+      alert("Please enter a valid phone number.");
+    }
+  };
+
+  const handlePrint = () => {
+    setShowButtons(false);
+
+    const rows = document.querySelectorAll(".billing-table tbody tr");
+    rows.forEach((row, index) => {
+      if (index < items.length && isRowEmpty(items[index])) {
+        row.classList.add("hide-for-print");
+      }
+    });
+
+    setTimeout(() => {
+      const invoiceBox = document.querySelector(".invoice-box");
+      html2canvas(invoiceBox, {
         backgroundColor: "#ffffff",
         scale: 2,
         useCORS: true,
@@ -78,29 +166,18 @@ const TaxInvoice = () => {
         const imageUrl = canvas.toDataURL("image/png");
         const link = document.createElement("a");
         link.href = imageUrl;
-        link.download = "invoice.png";
+
+        const safeBuyerName = invoiceDetails.buyerName.replace(/[^a-zA-Z0-9]/g, "_") || "unnamed";
+        const safeInvoiceNo = invoiceDetails.invoiceNo.replace(/[^a-zA-Z0-9]/g, "_") || "unnamed";
+        const safeInvoiceDate = invoiceDetails.invoiceDate.replace(/[^a-zA-Z0-9]/g, "_") || "undated";
+
+        link.download = `invoice_${safeInvoiceNo}_${safeBuyerName}_${safeInvoiceDate}.png`;
         link.click();
 
-        // Restore elements with correct display properties
-        if (whatsappSection) whatsappSection.style.display = "block";
-        if (actionButtons) {
-          actionButtons.style.display = "flex"; // Restore as flex to maintain alignment
-          actionButtons.style.justifyContent = "flex-end"; // Explicitly set to ensure alignment
-        }
-        if (modal) modal.style.display = "flex"; // Restore modal as flex
-
-        const whatsappMessage = `🧾 *Tax Invoice*\n\nPlease find the invoice attached below.`;
-        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMessage)}`;
-        window.open(whatsappUrl, "_blank");
+        rows.forEach((row) => row.classList.remove("hide-for-print"));
+        setShowButtons(true);
       });
-    } else {
-      alert("Please enter a valid phone number.");
-    }
-  };
-
-
-  const handlePrint = () => {
-    window.print();
+    }, 100);
   };
 
   const openModal = () => {
@@ -117,12 +194,41 @@ const TaxInvoice = () => {
 
   const handleAlertSave = () => {
     setShowAlert(false);
-    alert("Invoice Saved Successfully!"); // Example of save behavior
-
+    alert("Invoice Saved Successfully!");
   };
+
+  const subtotal = calculateSubtotal();
+  const { cgst, sgst, igst } = calculateTax(subtotal);
+  const totalAmount = subtotal + cgst + sgst + igst;
+  const totalQuantity = calculateTotalQuantity();
 
   return (
     <div className="invoice-box">
+      <style>
+        {`
+          .invoice-box * {
+            text-transform: uppercase;
+          }
+          .invoice-box input {
+            text-transform: uppercase;
+          }
+          .highlight-block, .info-table, .billing-table {
+            text-transform: uppercase;
+          }
+          .billing-table input {
+            text-transform: uppercase;
+          }
+          .right {
+            text-align: right;
+          }
+          .bold {
+            font-weight: bold;
+          }
+          .hide-for-print {
+            display: none;
+          }
+        `}
+      </style>
       <div className="highlight-block">
         <h2 className="main-header">🧾 Tax Invoice</h2>
         <h4><strong>SHREE GOPAL ACCESSORIES</strong></h4>
@@ -138,43 +244,48 @@ const TaxInvoice = () => {
       <table className="info-table">
         <tbody>
           <tr>
-            <td><span className="info-title">Invoice No:</span>
+            <td>
+              <span className="info-title">Invoice No:</span>
               <input
                 type="text"
                 value={invoiceDetails.invoiceNo}
-                onChange={(e) => handleInvoiceDetailsChange('invoiceNo', e.target.value)}
+                onChange={(e) => handleInvoiceDetailsChange("invoiceNo", e.target.value)}
               />
             </td>
-            <td><span className="info-title">Invoice Date:</span>
+            <td>
+              <span className="info-title">Invoice Date:</span>
               <input
                 type="date"
                 value={invoiceDetails.invoiceDate}
-                onChange={(e) => handleInvoiceDetailsChange('invoiceDate', e.target.value)}
+                onChange={(e) => handleInvoiceDetailsChange("invoiceDate", e.target.value)}
               />
             </td>
           </tr>
           <tr>
-            <td><span className="info-title">Buyer Name:</span>
+            <td>
+              <span className="info-title">Buyer Name:</span>
               <input
                 type="text"
                 value={invoiceDetails.buyerName}
-                onChange={(e) => handleInvoiceDetailsChange('buyerName', e.target.value)}
+                onChange={(e) => handleInvoiceDetailsChange("buyerName", e.target.value)}
               />
             </td>
-            <td><span className="info-title">GSTIN:</span>
+            <td>
+              <span className="info-title">GSTIN:</span>
               <input
                 type="text"
                 value={invoiceDetails.buyerGSTIN}
-                onChange={(e) => handleInvoiceDetailsChange('buyerGSTIN', e.target.value)}
+                onChange={(e) => handleInvoiceDetailsChange("buyerGSTIN", e.target.value)}
               />
             </td>
           </tr>
           <tr>
-            <td colSpan="2"><span className="info-title">Buyer Address:</span>
+            <td colSpan="2">
+              <span className="info-title">Buyer Address:</span>
               <input
                 type="text"
                 value={invoiceDetails.buyerAddress}
-                onChange={(e) => handleInvoiceDetailsChange('buyerAddress', e.target.value)}
+                onChange={(e) => handleInvoiceDetailsChange("buyerAddress", e.target.value)}
               />
             </td>
           </tr>
@@ -214,22 +325,26 @@ const TaxInvoice = () => {
                 <input
                   type="number"
                   value={item.quantity}
-                  onChange={(e) => handleInputChange(index, "quantity", parseFloat(e.target.value))}
+                  onChange={(e) => handleInputChange(index, "quantity", e.target.value)}
                 />
               </td>
               <td>
                 <input
                   type="number"
                   value={item.rate}
-                  onChange={(e) => handleInputChange(index, "rate", parseFloat(e.target.value))}
+                  onChange={(e) => handleInputChange(index, "rate", e.target.value)}
                 />
               </td>
-              <td className="right">{item.amount.toFixed(2)}</td>
+              <td className="right">
+                {item.amount === "" || isNaN(parseFloat(item.amount)) ? "" : parseFloat(item.amount).toFixed(2)}
+              </td>
             </tr>
           ))}
           <tr>
-            <td colSpan="5" className="right bold">Subtotal</td>
-            <td className="right">{subtotal.toFixed(2)}</td>
+            <td colSpan="3" className="right bold">TOTAL</td>
+            <td className="right bold">{totalQuantity === 0 ? "" : totalQuantity.toFixed(2)}</td>
+            <td></td>
+            <td className="right bold">{subtotal === 0 ? "" : subtotal.toFixed(2)}</td>
           </tr>
           <tr>
             <td colSpan="5" className="right">CGST 9%</td>
@@ -245,7 +360,7 @@ const TaxInvoice = () => {
           </tr>
           <tr>
             <td colSpan="5" className="right bold">Total Amount</td>
-            <td className="right bold">{totalAmount.toFixed(2)}</td>
+            <td className="right bold">{totalAmount === 0 ? "" : totalAmount.toFixed(2)}</td>
           </tr>
         </tbody>
       </table>
@@ -269,52 +384,53 @@ const TaxInvoice = () => {
       </div>
 
       {showAlert && (
-  <div className="alert-box">
-    <div className="alert-content">
-      <h3>Are you sure you want to save the invoice?</h3>
-      <div className="button-group">
-        <button className="save-button" onClick={handleAlertSave}>
-          Save
-        </button>
-        <button className="cancel-button" onClick={handleAlertClose}>
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+        <div className="alert-box">
+          <div className="alert-content">
+            <h3>Are you sure you want to save the invoice?</h3>
+            <div className="button-group">
+              <button className="save-button" onClick={handleAlertSave}>
+                Save
+              </button>
+              <button className="cancel-button" onClick={handleAlertClose}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* Print and Share via WhatsApp Buttons on the same line */}
-      <div className="action-buttons">
-        {/* <button className="whatsapp-button" onClick={openModal}>
-          📤 Share via WhatsApp
-        </button> */}
-        <button className="print-button" onClick={handlePrint}>
-          🖨️ Print Invoice
-        </button>
-      </div>
+      {showButtons && (
+        <div className="action-buttons">
+          <button className="whatsapp-button" onClick={openModal}>
+            📤 Share via WhatsApp
+          </button>
+          <button className="print-button" onClick={handlePrint}>
+            🖨️ Print Invoice
+          </button>
+          <button className="clear-button" onClick={handleClear}>
+            🗑️ Clear All
+          </button>
+        </div>
+      )}
 
-      {/* Modal for Phone Number Input */}
       {showModal && (
-  <div className="modal">
-    <div className="modal-content">
-
-      <label htmlFor="phone-number">Enter Phone Number </label>
-      <input
-        type="text"
-        id="phone-number"
-        value={phoneNumber}
-        onChange={handlePhoneNumberChange}
-        placeholder="e.g., 919819287163"
-      />
-      <div className="button-group">
-        <button className="save-button" onClick={handleSendMessage}>Save</button>
-        <button className="cancel-button" onClick={closeModal}>Cancel</button>
-      </div>
-    </div>
-  </div>
-)}
-
+        <div className="modal">
+          <div className="modal-content">
+            <label htmlFor="phone-number">Enter Phone Number </label>
+            <input
+              type="text"
+              id="phone-number"
+              value={phoneNumber}
+              onChange={handlePhoneNumberChange}
+              placeholder="e.g., 919819287163"
+            />
+            <div className="button-group">
+              <button className="save-button" onClick={handleSendMessage}>Save</button>
+              <button className="cancel-button" onClick={closeModal}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
