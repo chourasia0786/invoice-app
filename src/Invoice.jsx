@@ -2,32 +2,23 @@ import React, { useState } from "react";
 import html2canvas from "html2canvas";
 
 const Invoice = () => {
-  const [items, setItems] = useState([
-    { description: "", quantity: "", rate: "", amount: "" },
-    { description: "", quantity: "", rate: "", amount: "" },
-    { description: "", quantity: "", rate: "", amount: "" },
-    { description: "", quantity: "", rate: "", amount: "" },
-    { description: "", quantity: "", rate: "", amount: "" },
-    { description: "", quantity: "", rate: "", amount: "" },
-    { description: "", quantity: "", rate: "", amount: "" },
-    { description: "", quantity: "", rate: "", amount: "" },
-    { description: "", quantity: "", rate: "", amount: "" },
-    { description: "", quantity: "", rate: "", amount: "" },
-    { description: "", quantity: "", rate: "", amount: "" },
-    { description: "", quantity: "", rate: "", amount: "" },
-  ]);
+  const initialItems = Array(12).fill().map(() => ({
+    description: "",
+    quantity: "",
+    rate: "",
+    amount: "",
+  }));
 
+  const [items, setItems] = useState(initialItems);
   const [invoiceDetails, setInvoiceDetails] = useState({
     invoiceNo: "",
     invoiceDate: "",
     buyerName: "",
   });
-
   const [showButtons, setShowButtons] = useState(true);
 
   const handleInputChange = (index, field, value) => {
     const updatedItems = [...items];
-    // Convert description to uppercase, keep other fields as is
     updatedItems[index][field] = field === "description" ? value.toUpperCase() : value;
 
     if (field === "quantity" || field === "rate") {
@@ -40,9 +31,17 @@ const Invoice = () => {
   };
 
   const handleInvoiceDetailsChange = (field, value) => {
-    // Convert buyerName to uppercase, keep other fields as is
     const newValue = field === "buyerName" ? value.toUpperCase() : value;
     setInvoiceDetails({ ...invoiceDetails, [field]: newValue });
+  };
+
+  const handleClear = () => {
+    setItems(initialItems);
+    setInvoiceDetails({
+      invoiceNo: "",
+      invoiceDate: "",
+      buyerName: "",
+    });
   };
 
   const calculateTotal = () => {
@@ -73,12 +72,10 @@ const Invoice = () => {
         const link = document.createElement("a");
         link.href = imageUrl;
 
-        // Create a safe filename by replacing invalid characters
         const safeBuyerName = invoiceDetails.buyerName.replace(/[^a-zA-Z0-9]/g, '_') || 'unnamed';
         const safeInvoiceNo = invoiceDetails.invoiceNo.replace(/[^a-zA-Z0-9]/g, '_') || 'unnamed';
         const safeInvoiceDate = invoiceDetails.invoiceDate.replace(/[^a-zA-Z0-9]/g, '_') || 'undated';
 
-        // Set filename as invoice_{invoiceNo}_{buyerName}_{invoiceDate}.png
         link.download = `invoice_${safeInvoiceNo}_${safeBuyerName}_${safeInvoiceDate}.png`;
         link.click();
 
@@ -98,13 +95,13 @@ const Invoice = () => {
             text-transform: uppercase;
           }
           .invoice-box input {
-            text-transform: uppercase; /* Force input display to uppercase */
+            text-transform: uppercase;
           }
           .highlight-block, .info-table, .billing-table {
             text-transform: uppercase;
           }
           .billing-table input {
-            text-transform: uppercase; /* Force input display to uppercase */
+            text-transform: uppercase;
           }
           .right {
             text-align: right;
@@ -214,6 +211,9 @@ const Invoice = () => {
         <div className="action-buttons">
           <button className="print-button" onClick={handlePrint}>
             🖨️ PRINT INVOICE
+          </button>
+          <button className="clear-button" onClick={handleClear}>
+            🗑️ CLEAR ALL
           </button>
         </div>
       )}
