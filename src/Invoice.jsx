@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import html2canvas from "html2canvas";
 
+
 const Invoice = () => {
   const initialItems = Array(12).fill().map(() => ({
     description: "",
@@ -15,6 +16,9 @@ const Invoice = () => {
     invoiceDate: "",
     buyerName: "",
   });
+  const handleAddRow = () => {
+    setItems([...items, { description: "", quantity: "", rate: "", amount: "" }]);
+  };
   const [showButtons, setShowButtons] = useState(true);
 
   const handleInputChange = (index, field, value) => {
@@ -134,7 +138,7 @@ const Invoice = () => {
         `}
       </style>
       <div className="highlight-block">
-        <h4><strong>SHREE GOPAL ACCESSORIES</strong></h4>
+        <h4><strong>SHREE GOPAL ACCESSORIES & Cover</strong></h4>
         <p><strong>MOBILE ACCESSORIES</strong></p>
         <p>
           1ST FLOOR, SHOP NO. 144/145, ORCHID CITY CENTRE MALL,<br />
@@ -231,6 +235,9 @@ const Invoice = () => {
 
       {showButtons && (
         <div className="action-buttons">
+          <button className="add-row-button" onClick={handleAddRow}>
+          ➕ ADD Item
+          </button>
           <button className="print-button" onClick={handlePrint}>
             🖨️ PRINT INVOICE
           </button>

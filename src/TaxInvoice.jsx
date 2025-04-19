@@ -43,7 +43,9 @@ const TaxInvoice = () => {
     const newValue = field === "buyerName" || field === "buyerAddress" ? value.toUpperCase() : value;
     setInvoiceDetails({ ...invoiceDetails, [field]: newValue });
   };
-
+  const handleAddRow = () => {
+    setItems([...items, { description: "", quantity: "", rate: "", amount: "" }]);
+  };
   const handleClear = () => {
     setItems(initialItems);
     setInvoiceDetails({
@@ -231,7 +233,7 @@ const TaxInvoice = () => {
       </style>
       <div className="highlight-block">
         <h2 className="main-header">🧾 Tax Invoice</h2>
-        <h4><strong>SHREE GOPAL ACCESSORIES</strong></h4>
+        <h4><strong>SHREE GOPAL ACCESSORIES & Cover</strong></h4>
         <p><strong>Mobile Accessories</strong></p>
         <p><span className="info-title">GSTIN:</span> 27AICPC5515G1ZO</p>
         <p>
@@ -401,8 +403,8 @@ const TaxInvoice = () => {
 
       {showButtons && (
         <div className="action-buttons">
-          <button className="whatsapp-button" onClick={openModal}>
-            📤 Share via WhatsApp
+          <button className="add-row-button" onClick={handleAddRow}>
+          ➕ ADD Item
           </button>
           <button className="print-button" onClick={handlePrint}>
             🖨️ Print Invoice
