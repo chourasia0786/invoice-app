@@ -3,7 +3,7 @@ import html2canvas from "html2canvas";
 import "./styles.css";
 
 const TaxInvoice = () => {
-  const initialItems = Array(12).fill().map(() => ({
+  const initialItems = Array(10).fill().map(() => ({
     description: "",
     quantity: "",
     rate: "",
@@ -89,64 +89,7 @@ const TaxInvoice = () => {
     );
   };
 
-  const handlePhoneNumberChange = (e) => {
-    setPhoneNumber(e.target.value);
-  };
 
-  const handleSendMessage = () => {
-    if (phoneNumber) {
-      setShowButtons(false);
-      const whatsappSection = document.querySelector(".whatsapp-section");
-      const actionButtons = document.querySelector(".action-buttons");
-      const modal = document.querySelector(".modal");
-
-      if (whatsappSection) whatsappSection.style.display = "none";
-      if (actionButtons) actionButtons.style.display = "none";
-      if (modal) modal.style.display = "none";
-
-      const rows = document.querySelectorAll(".billing-table tbody tr");
-      rows.forEach((row, index) => {
-        if (index < items.length && isRowEmpty(items[index])) {
-          row.classList.add("hide-for-print");
-        }
-      });
-
-      setTimeout(() => {
-        html2canvas(document.querySelector(".invoice-box"), {
-          backgroundColor: "#ffffff",
-          scale: 2,
-          useCORS: true,
-        }).then((canvas) => {
-          const imageUrl = canvas.toDataURL("image/png");
-          const link = document.createElement("a");
-          link.href = imageUrl;
-
-          const safeBuyerName = invoiceDetails.buyerName.replace(/[^a-zA-Z0-9]/g, "_") || "unnamed";
-          const safeInvoiceNo = invoiceDetails.invoiceNo.replace(/[^a-zA-Z0-9]/g, "_") || "unnamed";
-          const safeInvoiceDate = invoiceDetails.invoiceDate.replace(/[^a-zA-Z0-9]/g, "_") || "undated";
-
-          link.download = `invoice_${safeInvoiceNo}_${safeBuyerName}_${safeInvoiceDate}.png`;
-          link.click();
-
-          if (whatsappSection) whatsappSection.style.display = "block";
-          if (actionButtons) {
-            actionButtons.style.display = "flex";
-            actionButtons.style.justifyContent = "flex-end";
-          }
-          if (modal) modal.style.display = "flex";
-
-          rows.forEach((row) => row.classList.remove("hide-for-print"));
-          setShowButtons(true);
-
-          const whatsappMessage = `🧾 *Tax Invoice*\n\nPlease find the invoice attached below.`;
-          const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMessage)}`;
-          window.open(whatsappUrl, "_blank");
-        });
-      }, 100);
-    } else {
-      alert("Please enter a valid phone number.");
-    }
-  };
 
   const handlePrint = () => {
     setShowButtons(false);
@@ -180,23 +123,6 @@ const TaxInvoice = () => {
         setShowButtons(true);
       });
     }, 100);
-  };
-
-  const openModal = () => {
-    setShowModal(true);
-  };
-
-  const closeModal = () => {
-    setShowModal(false);
-  };
-
-  const handleAlertClose = () => {
-    setShowAlert(false);
-  };
-
-  const handleAlertSave = () => {
-    setShowAlert(false);
-    alert("Invoice Saved Successfully!");
   };
 
   const subtotal = calculateSubtotal();
@@ -233,8 +159,7 @@ const TaxInvoice = () => {
       </style>
       <div className="highlight-block">
         <h2 className="main-header">🧾 Tax Invoice</h2>
-        <h4><strong>SHREE GOPAL ACCESSORIES & Cover</strong></h4>
-        <p><strong>Mobile Accessories</strong></p>
+        <h4><strong>SHREE GOPAL ACCESSORIES Mobile & Cover</strong></h4>
         <p><span className="info-title">GSTIN:</span> 27AICPC5515G1ZO</p>
         <p>
           1st Floor, Shop No. 144/145, Orchid City Centre Mall,<br />
@@ -385,21 +310,7 @@ const TaxInvoice = () => {
         (For SHREE GOPAL ACCESSORIES)
       </div>
 
-      {showAlert && (
-        <div className="alert-box">
-          <div className="alert-content">
-            <h3>Are you sure you want to save the invoice?</h3>
-            <div className="button-group">
-              <button className="save-button" onClick={handleAlertSave}>
-                Save
-              </button>
-              <button className="cancel-button" onClick={handleAlertClose}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {showButtons && (
         <div className="action-buttons">
@@ -415,24 +326,7 @@ const TaxInvoice = () => {
         </div>
       )}
 
-      {showModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <label htmlFor="phone-number">Enter Phone Number </label>
-            <input
-              type="text"
-              id="phone-number"
-              value={phoneNumber}
-              onChange={handlePhoneNumberChange}
-              placeholder="e.g., 919819287163"
-            />
-            <div className="button-group">
-              <button className="save-button" onClick={handleSendMessage}>Save</button>
-              <button className="cancel-button" onClick={closeModal}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 };

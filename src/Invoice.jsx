@@ -3,7 +3,7 @@ import html2canvas from "html2canvas";
 
 
 const Invoice = () => {
-  const initialItems = Array(12).fill().map(() => ({
+  const initialItems = Array(10).fill().map(() => ({
     description: "",
     quantity: "",
     rate: "",
@@ -138,8 +138,7 @@ const Invoice = () => {
         `}
       </style>
       <div className="highlight-block">
-        <h4><strong>SHREE GOPAL ACCESSORIES & Cover</strong></h4>
-        <p><strong>MOBILE ACCESSORIES</strong></p>
+        <h4><strong>SHREE GOPAL ACCESSORIES Mobile & Cover</strong></h4>
         <p>
           1ST FLOOR, SHOP NO. 144/145, ORCHID CITY CENTRE MALL,<br />
           BELLASIS ROAD, OPP. S.T. DEPOT, TARDEO,<br />
