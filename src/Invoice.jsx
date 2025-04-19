@@ -138,7 +138,7 @@ const Invoice = () => {
         `}
       </style>
       <div className="highlight-block">
-        <h4><strong>SHREE GOPAL ACCESSORIES Mobile & Cover</strong></h4>
+        <h4><strong>SHREE GOPAL Mobile ACCESSORIES & Cover</strong></h4>
         <p>
           1ST FLOOR, SHOP NO. 144/145, ORCHID CITY CENTRE MALL,<br />
           BELLASIS ROAD, OPP. S.T. DEPOT, TARDEO,<br />

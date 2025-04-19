@@ -159,7 +159,7 @@ const TaxInvoice = () => {
       </style>
       <div className="highlight-block">
         <h2 className="main-header">🧾 Tax Invoice</h2>
-        <h4><strong>SHREE GOPAL ACCESSORIES Mobile & Cover</strong></h4>
+        <h4><strong>SHREE GOPAL Mobile ACCESSORIES & Cover</strong></h4>
         <p><span className="info-title">GSTIN:</span> 27AICPC5515G1ZO</p>
         <p>
           1st Floor, Shop No. 144/145, Orchid City Centre Mall,<br />
